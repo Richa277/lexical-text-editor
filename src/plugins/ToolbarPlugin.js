@@ -59,37 +59,6 @@ export default function ToolbarPlugin() {
   const toolbarRef = useRef(null);
   const dropDownRef = useRef(null);
 
-  useEffect(() => {
-    const toolbar = toolbarRef.current;
-    const dropDown = dropDownRef.current;
-
-    if (toolbar !== null && dropDown !== null) {
-      const { top, left } = toolbar.getBoundingClientRect();
-      dropDown.style.top = `${top + 40}px`;
-      dropDown.style.left = `${left}px`;
-    }
-  }, [dropDownRef, toolbarRef]);
-
-  useEffect(() => {
-    const dropDown = dropDownRef.current;
-    const toolbar = toolbarRef.current;
-
-    if (dropDown !== null && toolbar !== null) {
-      const handle = (event) => {
-        const target = event.target;
-
-        if (!dropDown.contains(target) && !toolbar.contains(target)) {
-          setShowBlockOptionsDropDown(false);
-        }
-      };
-      document.addEventListener("click", handle);
-
-      return () => {
-        document.removeEventListener("click", handle);
-      };
-    }
-  }, [dropDownRef, setShowBlockOptionsDropDown, toolbarRef]);
-
   const formatParagraph = () => {
     if (blockType !== "paragraph") {
       editor.update(() => {
@@ -140,6 +109,37 @@ export default function ToolbarPlugin() {
     }
     setShowBlockOptionsDropDown(false);
   };
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    const dropDown = dropDownRef.current;
+
+    if (toolbar !== null && dropDown !== null) {
+      const { top, left } = toolbar.getBoundingClientRect();
+      dropDown.style.top = `${top + 40}px`;
+      dropDown.style.left = `${left}px`;
+    }
+  }, [dropDownRef, toolbarRef]);
+
+  useEffect(() => {
+    const dropDown = dropDownRef.current;
+    const toolbar = toolbarRef.current;
+
+    if (dropDown !== null && toolbar !== null) {
+      const handle = (event) => {
+        const target = event.target;
+
+        if (!dropDown.contains(target) && !toolbar.contains(target)) {
+          setShowBlockOptionsDropDown(false);
+        }
+      };
+      document.addEventListener("click", handle);
+
+      return () => {
+        document.removeEventListener("click", handle);
+      };
+    }
+  }, [dropDownRef, setShowBlockOptionsDropDown, toolbarRef]);
+
 
   useEffect(() => {
     return mergeRegister(
