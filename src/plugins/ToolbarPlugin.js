@@ -28,6 +28,7 @@ const blockTypeToBlockName = {
   quote: "Quote",
 };
 
+
 function Divider() {
   return <div className="divider" />;
 }
