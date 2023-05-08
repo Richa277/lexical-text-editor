@@ -16,7 +16,6 @@ import {
   $isHeadingNode,
 } from "@lexical/rich-text";
 const LowPriority = 1;
-
 const supportedBlockTypes = new Set(["paragraph", "quote", "h1", "h2"]);
 
 const blockTypeToBlockName = {
