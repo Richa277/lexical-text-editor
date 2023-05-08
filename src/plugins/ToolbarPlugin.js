@@ -9,7 +9,6 @@ import {
 import { $wrapNodes } from "@lexical/selection";
 import { $getNearestNodeOfType, mergeRegister } from "@lexical/utils";
 import { $isListNode, ListNode } from "@lexical/list";
-import { createPortal } from "react-dom";
 import {
   $createHeadingNode,
   $createQuoteNode,
@@ -27,18 +26,37 @@ const blockTypeToBlockName = {
   paragraph: "Normal",
   quote: "Quote",
 };
+export default function ToolbarPlugin() {
+  const [editor] = useLexicalComposerContext();
+  const [blockType, setBlockType] = useState("paragraph");
+  const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] =
+    useState(false);
 
-
-function Divider() {
-  return <div className="divider" />;
-}
-
-function BlockOptionsDropdownList({
-  editor,
-  blockType,
-  toolbarRef,
-  setShowBlockOptionsDropDown,
-}) {
+  const updateToolbar = useCallback(() => {
+    const selection = $getSelection();
+    if ($isRangeSelection(selection)) {
+      const anchorNode = selection.anchor.getNode();
+      const element =
+        anchorNode.getKey() === "root"
+          ? anchorNode
+          : anchorNode.getTopLevelElementOrThrow();
+      const elementKey = element.getKey();
+      const elementDOM = editor.getElementByKey(elementKey);
+      if (elementDOM !== null) {
+        if ($isListNode(element)) {
+          const parentList = $getNearestNodeOfType(anchorNode, ListNode);
+          const type = parentList ? parentList.getTag() : element.getTag();
+          setBlockType(type);
+        } else {
+          const type = $isHeadingNode(element)
+            ? element.getTag()
+            : element.getType();
+          setBlockType(type);
+        }
+      }
+    }
+  }, [editor]);
+  const toolbarRef = useRef(null);
   const dropDownRef = useRef(null);
 
   useEffect(() => {
@@ -122,63 +140,6 @@ function BlockOptionsDropdownList({
     }
     setShowBlockOptionsDropDown(false);
   };
-  return (
-    <div className="dropdown" ref={dropDownRef}>
-      <button className="item" onClick={formatParagraph}>
-        <span className="icon paragraph" />
-        <span className="text">Normal</span>
-        {blockType === "paragraph" && <span className="active" />}
-      </button>
-      <button className="item" onClick={formatLargeHeading}>
-        <span className="icon large-heading" />
-        <span className="text">Large Heading</span>
-        {blockType === "h1" && <span className="active" />}
-      </button>
-      <button className="item" onClick={formatSmallHeading}>
-        <span className="icon small-heading" />
-        <span className="text">Small Heading</span>
-        {blockType === "h2" && <span className="active" />}
-      </button>
-      <button className="item" onClick={formatQuote}>
-        <span className="icon quote" />
-        <span className="text">Quote</span>
-        {blockType === "quote" && <span className="active" />}
-      </button>
-    </div>
-  );
-}
-
-export default function ToolbarPlugin() {
-  const [editor] = useLexicalComposerContext();
-  const toolbarRef = useRef(null);
-  const [blockType, setBlockType] = useState("paragraph");
-  const [showBlockOptionsDropDown, setShowBlockOptionsDropDown] =
-    useState(false);
-
-  const updateToolbar = useCallback(() => {
-    const selection = $getSelection();
-    if ($isRangeSelection(selection)) {
-      const anchorNode = selection.anchor.getNode();
-      const element =
-        anchorNode.getKey() === "root"
-          ? anchorNode
-          : anchorNode.getTopLevelElementOrThrow();
-      const elementKey = element.getKey();
-      const elementDOM = editor.getElementByKey(elementKey);
-      if (elementDOM !== null) {
-        if ($isListNode(element)) {
-          const parentList = $getNearestNodeOfType(anchorNode, ListNode);
-          const type = parentList ? parentList.getTag() : element.getTag();
-          setBlockType(type);
-        } else {
-          const type = $isHeadingNode(element)
-            ? element.getTag()
-            : element.getType();
-          setBlockType(type);
-        }
-      }
-    }
-  }, [editor]);
 
   useEffect(() => {
     return mergeRegister(
@@ -199,33 +160,26 @@ export default function ToolbarPlugin() {
   }, [editor, updateToolbar]);
   return (
     <div className="toolbar" ref={toolbarRef}>
-      <Divider />
-      {supportedBlockTypes.has(blockType) && (
-        <>
-          <button
-            className="toolbar-item block-controls"
-            onClick={() =>
-              setShowBlockOptionsDropDown(!showBlockOptionsDropDown)
-            }
-            aria-label="Formatting Options"
-          >
-            <span className={"icon block-type " + blockType} />
-            <span className="text">{blockTypeToBlockName[blockType]}</span>
-            <i className="chevron-down" />
-          </button>
-          {showBlockOptionsDropDown &&
-            createPortal(
-              <BlockOptionsDropdownList
-                editor={editor}
-                blockType={blockType}
-                toolbarRef={toolbarRef}
-                setShowBlockOptionsDropDown={setShowBlockOptionsDropDown}
-              />,
-              document.body
-            )}
-          <Divider />
-        </>
-      )}
+      <button className="item" onClick={formatParagraph}>
+        <span className="icon paragraph" />
+        <span className="text">Normal</span>
+        {blockType === "paragraph" && <span className="active" />}
+      </button>
+      <button className="item" onClick={formatLargeHeading}>
+        <span className="icon large-heading" />
+        <span className="text">Large Heading</span>
+        {blockType === "h1" && <span className="active" />}
+      </button>
+      <button className="item" onClick={formatSmallHeading}>
+        <span className="icon small-heading" />
+        <span className="text">Small Heading</span>
+        {blockType === "h2" && <span className="active" />}
+      </button>
+      <button className="item" onClick={formatQuote}>
+        <span className="icon quote" />
+        <span className="text">Quote</span>
+        {blockType === "quote" && <span className="active" />}
+      </button>
     </div>
   );
 }

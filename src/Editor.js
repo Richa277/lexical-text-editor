@@ -4,7 +4,7 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { $getRoot, $getSelection } from "lexical";
+import { $getRoot} from "lexical";
 import { useState } from "react";
 
 import ToolbarPlugin from "./plugins/ToolbarPlugin";
@@ -26,7 +26,6 @@ export default function Editor() {
   const handleINput = (editorState) => {
     editorState.read(() => {
       const root = $getRoot();
-      const selection = $getSelection();
       setText(root.__cachedText);
 
       if (root.__cachedText === "/") {
@@ -41,7 +40,6 @@ export default function Editor() {
       } else if (text.length > 1) {
         setSearch(text.replace("/", ""));
       }
-      console.log(root.__cachedText, text);
     });
   };
   return (
